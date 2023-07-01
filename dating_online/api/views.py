@@ -1,4 +1,6 @@
+from api.include.watermark import watermark_with_transparency
 from api.serializers import CreateClientSerializer, TokenSerializer
+from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from rest_framework import mixins, status
 from rest_framework.authtoken.models import Token
@@ -13,6 +15,17 @@ class CreateClientViewSet(mixins.CreateModelMixin,
                           GenericViewSet):
     """Регистрация пользователя"""
     serializer_class = CreateClientSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        profile_picture_with_watermark = watermark_with_transparency(
+            request.data['profile_picture'],
+            settings.WATERMARK_URL,
+            position=settings.WATERMARK_POSITION
+        )
+        serializer.save(profile_picture=profile_picture_with_watermark)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class AuthClientViewSet(GenericViewSet):

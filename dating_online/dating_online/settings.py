@@ -129,3 +129,8 @@ REST_FRAMEWORK = {
 # Default primary key field type
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Constants
+
+WATERMARK_URL = 'api/include/watermark.png'
+WATERMARK_POSITION = (10, 10)
