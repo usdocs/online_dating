@@ -10,7 +10,7 @@ SEX = (
 
 class User(AbstractUser):
     profile_picture = models.ImageField(
-        upload_to='users/images/',
+        upload_to='images/',
         verbose_name='Аватарка'
     )
 
