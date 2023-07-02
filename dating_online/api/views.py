@@ -1,7 +1,8 @@
+from api.include.filters import DistanceFilter
 from api.include.send_mail import send_mail_match
 from api.include.watermark import watermark_with_transparency
-from api.serializers import (CreateClientSerializer, RetrieveClientSerializer,
-                             TokenSerializer)
+from api.serializers import (CoordinatesSerializer, CreateClientSerializer,
+                             RetrieveClientSerializer, TokenSerializer)
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import get_object_or_404
@@ -12,7 +13,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from users.models import Match, User
+from users.models import Coordinates, Match, User
 
 
 class CreateClientViewSet(mixins.CreateModelMixin,
@@ -29,6 +30,22 @@ class CreateClientViewSet(mixins.CreateModelMixin,
             position=settings.WATERMARK_POSITION
         )
         serializer.save(profile_picture=profile_picture_with_watermark)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=(IsAuthenticated,),
+        serializer_class=CoordinatesSerializer
+    )
+    def coordinates(self, request):
+        """Фиксирует текущие координаты"""
+        coordinates = Coordinates.objects.filter(user=request.user).first()
+        if coordinates:
+            coordinates.delete()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -114,3 +131,4 @@ class ListClientViewSet(mixins.ListModelMixin,
     serializer_class = RetrieveClientSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('sex', 'first_name', 'last_name')
+    filterset_class = DistanceFilter

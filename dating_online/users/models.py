@@ -86,3 +86,25 @@ class Match(models.Model):
 
     def __str__(self):
         return f'{self.user} {self.liking}'
+
+
+class Coordinates(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='coordinates',
+        verbose_name='Координаты пользователя'
+    )
+    longitude = models.FloatField(
+        'Долгота',
+    )
+
+    latitude = models.FloatField(
+        'Широта',
+    )
+
+    class Meta:
+        ordering = ['-id']
+
+    def __str__(self):
+        return f'Координаты {self.user}'
