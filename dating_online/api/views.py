@@ -5,6 +5,7 @@ from api.serializers import (CreateClientSerializer, RetrieveClientSerializer,
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
@@ -105,3 +106,11 @@ class RetrieveMatchClientViewSet(mixins.RetrieveModelMixin,
             send_mail_match(user, liking_user)
             send_mail_match(liking_user, user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ListClientViewSet(mixins.ListModelMixin,
+                        GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = RetrieveClientSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('sex', 'first_name', 'last_name')
