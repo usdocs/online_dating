@@ -21,3 +21,10 @@ class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'password')
+
+
+class RetrieveClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('profile_picture', 'sex', 'first_name', 'last_name', 'email',
+                  'username')

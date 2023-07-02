@@ -1,14 +1,17 @@
+from api.include.send_mail import send_mail_match
 from api.include.watermark import watermark_with_transparency
-from api.serializers import CreateClientSerializer, TokenSerializer
+from api.serializers import (CreateClientSerializer, RetrieveClientSerializer,
+                             TokenSerializer)
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
+from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from users.models import User
+from users.models import Match, User
 
 
 class CreateClientViewSet(mixins.CreateModelMixin,
@@ -66,3 +69,39 @@ class AuthClientViewSet(GenericViewSet):
         """Удаляет токен авторизации"""
         Token.objects.filter(user=request.user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RetrieveMatchClientViewSet(mixins.RetrieveModelMixin,
+                                 GenericViewSet):
+    """Получение данных пользователя"""
+    queryset = User.objects.all()
+    serializer_class = RetrieveClientSerializer
+
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=(IsAuthenticated,),
+    )
+    def match(self, request, pk):
+        """Эндпоинт оценивания участником, только для авторизованных!"""
+        liking_user = get_object_or_404(User, id=pk)
+        user = get_object_or_404(User, username=self.request.user.username)
+        if str(user.id) == pk:
+            return Response(
+                {'Вы не можете проявить симпатию к себе)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        match, created = Match.objects.get_or_create(
+            user=user,
+            liking=liking_user
+        )
+        if not created:
+            return Response(
+                {'Вы уже проявили симпатию к данному пользователю'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        serializer = self.get_serializer(liking_user)
+        if liking_user.liker.filter(liking=user).first():
+            send_mail_match(user, liking_user)
+            send_mail_match(liking_user, user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

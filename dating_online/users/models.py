@@ -59,3 +59,30 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class Match(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='liker',
+        verbose_name='Лайкер'
+    )
+    liking = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='liking',
+        verbose_name='Объект симпатии'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'liking'],
+                name='unique_together'
+            )
+        ]
+        ordering = ['-id']
+
+    def __str__(self):
+        return f'{self.user} {self.liking}'
