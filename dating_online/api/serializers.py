@@ -1,7 +1,7 @@
 from django.contrib.auth.hashers import make_password
 from geopy.distance import great_circle
 from rest_framework import serializers
-from users.models import Coordinates, SEX, User
+from users.models import SEX, Coordinates, User
 
 
 class CreateClientSerializer(serializers.ModelSerializer):
@@ -34,15 +34,18 @@ class RetrieveClientSerializer(serializers.ModelSerializer):
 
     def get_distance(self, obj):
         request = self.context.get('request')
-        location_client = (
-            obj.coordinates.latitude,
-            obj.coordinates.longitude
-        )
-        self_location = (
-            request.user.coordinates.latitude,
-            request.user.coordinates.longitude
-        )
-        return great_circle(location_client, self_location).km
+        if (Coordinates.objects.filter(user=obj) and
+           Coordinates.objects.filter(user=request.user)):
+            location_client = (
+                obj.coordinates.latitude,
+                obj.coordinates.longitude
+            )
+            self_location = (
+                request.user.coordinates.latitude,
+                request.user.coordinates.longitude
+            )
+            return great_circle(location_client, self_location).km
+        return ''
 
 
 class CoordinatesSerializer(serializers.ModelSerializer):

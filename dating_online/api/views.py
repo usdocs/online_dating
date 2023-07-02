@@ -127,8 +127,10 @@ class RetrieveMatchClientViewSet(mixins.RetrieveModelMixin,
 
 class ListClientViewSet(mixins.ListModelMixin,
                         GenericViewSet):
+    """Получение списка пользователей с фильтрацией"""
     queryset = User.objects.all()
     serializer_class = RetrieveClientSerializer
+    permission_classes = (IsAuthenticated,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('sex', 'first_name', 'last_name')
     filterset_class = DistanceFilter
