@@ -15,13 +15,15 @@ class DistanceFilter(rest_framework.FilterSet):
                 self.request.user.coordinates.latitude,
                 self.request.user.coordinates.longitude
             )
-        user_list_distance = user_list
-        for user in user_list:
+
+        def distance_calc(user):
             location_client = (
                 user.coordinates.latitude,
                 user.coordinates.longitude
             )
-            distance = great_circle(location_client, self_location).km
-            if distance > float(value):
-                user_list_distance = user_list_distance.exclude(id=user.id)
-        return user_list_distance
+            if great_circle(location_client, self_location).km < float(value):
+                return user.username
+            return None
+
+        list_distance = list(map(lambda user: distance_calc(user), user_list))
+        return user_list.filter(username__in=list_distance)
