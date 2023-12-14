@@ -1,10 +1,11 @@
-from api.include.send_mail import send_mail_match
-from api.include.watermark import watermark_with_transparency
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from geopy.distance import great_circle
 from rest_framework import serializers, status
 from rest_framework.authtoken.models import Token
+
+from api.include.send_mail import send_mail_match
+from api.include.watermark import watermark_with_transparency
 from users.models import SEX, Coordinates, Match, User
 
 

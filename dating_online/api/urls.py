@@ -1,7 +1,8 @@
-from api.views import (AuthClientViewSet, CreateClientViewSet,
-                       ListClientViewSet, RetrieveMatchClientViewSet)
 from django.urls import include, path
 from rest_framework import routers
+
+from api.views import (AuthClientViewSet, CreateClientViewSet,
+                       ListClientViewSet, RetrieveMatchClientViewSet)
 
 v1_router = routers.DefaultRouter()
 v1_1_router = routers.DefaultRouter()
